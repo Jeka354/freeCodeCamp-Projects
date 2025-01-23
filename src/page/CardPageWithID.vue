@@ -1,6 +1,5 @@
 <template>
     <div class="card-page">
-        <h1>Это страница карточки с ID = {{ $route.params.id }}</h1>
         <div class="card-details" v-if="cardData">
             <h2 class="card-title">Имя пользователя: {{ cardData.name }}</h2>
             <h3 class="card-username">Ник пользователя: {{ cardData.username }}</h3>

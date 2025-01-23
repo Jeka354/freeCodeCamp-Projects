@@ -23,7 +23,7 @@ export default {
     },
     props:{
         cards: { // описание ожидаемых входных данных (пропсов) от родителя и дальнейшее использование. принимаем массив объектов
-            type: Array,
+            type: Object,
             required: true
         },
         imgSrc: {
@@ -31,7 +31,8 @@ export default {
             required: true
         }
         
-    }
+    },
+   
 }
 </script>
 

@@ -1,62 +1,64 @@
 <template>
     <div class="cards">
-        <div class="card-item" @click="openCard(card.id)">
-            <div class="card-container">
-                <h4 class="card-title">{{ card.username }}</h4>
-                <h5 class="card-content">Имя игрока: {{ card.name }}</h5>
-                <h5 class="card-content">Город: {{ card.address.city }}</h5>
-                <div class="image-container" style="height: 100%;">
-                    <img v-if="imgSrc" :src="imgSrc.urls.regular" alt="pictures" style="width: 100%; height: 100%; object-fit: cover">
+        <div class="card" @click="openCard(card.id)">
+            <div class="card__container">
+                <h4 class="card__title">{{ card.username }}</h4>
+                <h5 class="card__content">Имя игрока: {{ card.name }}</h5>
+                <h5 class="card__content">Город: {{ card.address.city }}</h5>
+                <div class="card__image-container">
+                    <img class="card__image" v-if="imgSrc" :src="imgSrc.urls.raw" alt="pictures">
                 </div>
             </div>
         </div>
     </div>
 </template>
+
 <script>
+import { defineComponent, toRefs } from 'vue';
+import { useRouter } from 'vue-router';
 
-export default {
-
-    props:{
+export default defineComponent({
+    props: {
         card: { 
-            type: Array,
+            type: Object,
             required: true
         },
         imgSrc: {
-            type: Array,
-            required: true
+            type: Object,
         }
-        
     },
-    methods: {
-        openCard(cardId) {
-            this.$router.push(`/cards/${cardId}`);
-        }
+    setup(props) {
+        const router = useRouter();
+        const { card, imgSrc } = toRefs(props);
+
+        const openCard = (cardId) => {
+            router.push(`/cards/${cardId}`);
+        };
+
+        return {
+            card,
+            imgSrc,
+            openCard
+        };
     }
-}
+});
 </script>
 
-<style >
-*{
-    box-sizing: border-box;
-}
-
+<style>
 .cards{
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-evenly;
+    
 }
 
-.card-container{
-    height: 100%; 
-    overflow: hidden;
-}
-
-.card-item {
+.card {
     width: 250px; 
     height: 350px; 
     margin: 20px;
     padding: 10px;
+    cursor: pointer;
     background-color: #efefef; 
     border-radius: 5px;
     border: 3px solid transparent;
@@ -64,38 +66,45 @@ export default {
     transition: background-color 0.7s ease, border 0.7s ease;
 }
 
-.card-item:hover {
+.card__container{
+    height: 100%; 
+    overflow: hidden;
+}
+
+.card:hover {
     background-color: #e8e8e8; 
     background: linear-gradient(45deg, #42d392, #647eff); 
     box-shadow: 4px 4px 3px rgba(0, 106, 12, 0.5);
     border: 3px solid rgb(0, 255, 0);
-    cursor: pointer;
+    
 }
 
-.card-item:hover .card-title,
-.card-item:hover .card-content {
+.card__item:hover .card__title,
+.card__item:hover .card__content {
     color: #fff;
 }
 
-.card-title {
+.card__title {
     font-size: 1.5em; 
     color: #333; 
     margin-bottom: 10px; 
 }
 
 
-.card-content {
+.card__content {
     color: #666;
     line-height: 1.5; 
 }
 
-.image-container{
+.card__image-container{
+    height: 100%;
     margin-top: 10px;
 }
 
-
-.img{
-    max-width: 200px;
-    max-height: 100px;
+.card__image{
+    height: 100%; 
+    object-fit: cover;
 }
+
+
 </style>
