@@ -1,213 +1,184 @@
 <template>
-    <!-- Корневой компонент -->
-    <div>
-        <h1 style="margin-bottom: 15px; text-align: center;">Страница с карточками</h1>
-        <!-- Реализация поиска -->
-        <div class="srch-inputs">
-            <!-- Компонент UI кнопка -->
-            <my-input
-                v-model="searchQuery"
-                @input="filterCards"
-                @keydown.enter="navigateToUser"
-                @keydown.up.prevent="moveHighlight(-1)"
-                @keydown.down.prevent="moveHighlight(1)"
-                placeholder="Поиск с подсказкой для выбора"
-                style="width: 40%; margin-bottom: 15px;"
-            />
-            <!-- Выплывающие подсказки, если отфильтрованный массим больше ноля -->
-            <div v-if="filteredCards.length > 0" class="suggestions">
-                <ul>
-                    <li 
-                        v-for="(card, index) in filteredCards" 
-                        :key="card.id" 
-                        @click="openCard(card.id)"
-                        @mouseover="highlightIndex = index"
-                        :class="{ highlighted: highlightIndex === index }"
-                    >
-                        {{ card.name }}
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <!-- Компонент вывода карточек с передачей пропсов в качестве принимаемых компонентом параметров с условным рендерингом -->
-        <Cards 
-            :cards="cards" 
-            :imgSrc="imgSrc"
+    <div class="cards-page">
+      <h1 class="cards-page__title">Страница с карточками</h1>
+      <div class="cards-page__search">
+        <my-input
+          v-model="searchQuery"
+          @input="filterCards"
+          @keydown.enter="navigateToUser"
+          @keydown.up.prevent="moveHighlight(-1)"
+          @keydown.down.prevent="moveHighlight(1)"
+          placeholder="Поиск с подсказкой для выбора"
+          class="cards-page__input"
         />
+        <div v-if="filteredCards.length > 0" class="cards-page__suggestions">
+          <ul class="cards-page__suggestions-list">
+            <li
+              v-for="(card, index) in filteredCards"
+              :key="card.id"
+              @click="openCard(card.id)"
+              @mouseover="highlightIndex = index"
+              :class="{ 'cards-page__suggestion--highlighted': highlightIndex === index }"
+              class="cards-page__suggestion"
+            >
+              {{ card.name }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <Cards :cards="cards" :imgSrc="imgSrc" class="cards-page__cards" />
     </div>
-</template>
-
-
-
-<script>
-import Cards from '@/components/Cards.vue';
-import Card from '@/components/Card.vue';
-
-export default {
-    // регистрация компонентов из импорта
+  </template>
+  
+  <script>
+  import { ref, computed, onMounted } from 'vue';
+  import { useRouter } from 'vue-router';
+  import Cards from '@/components/Cards.vue';
+  
+  export default {
     components: {
-        Cards, Card
+      Cards,
     },
-    // Модели для использования в пропсах и отслеживании компонентами 
-    data(){
-        return {
-            searchQuery: '',
-            cards: [], // Для сохранения данных карточек пользователей
-            filteredCards: [], // Массив для результатов фильтра
-            highlightIndex: -1, // Индекс выделенного элемента
-            imgSrc: [], // для сохранения данных фото, сторонее API
+    setup() {
+      const router = useRouter();
+      const searchQuery = ref('');
+      const cards = ref([]);
+      const filteredCards = ref([]);
+      const highlightIndex = ref(-1);
+      const imgSrc = ref([]);
+  
+      // Загрузка данных
+      const fetchData = async () => {
+        try {
+          const cardsResponse = await fetch('https://jsonplaceholder.typicode.com/users');
+          cards.value = await cardsResponse.json();
+  
+          const imgResponse = await fetch(
+            'https://api.unsplash.com/photos/?client_id=F3Lq5bwhNJdj_SbtRdcoMWaU2uW0Qd3iqeTrp9kXQOI'
+          );
+          imgSrc.value = await imgResponse.json();
+        } catch (error) {
+          console.error('Ошибка при загрузке данных:', error);
         }
-    },
-
-    methods:{
-        // Получение данных из API
-        async fetchData() {
-            try {
-                const cardsResponse = await fetch('https://jsonplaceholder.typicode.com/users');
-                this.cards = await cardsResponse.json();
-
-                const imgResponse = await fetch('https://api.unsplash.com/photos/?client_id=F3Lq5bwhNJdj_SbtRdcoMWaU2uW0Qd3iqeTrp9kXQOI');
-                this.imgSrc = await imgResponse.json();
-            } catch (error) {
-                console.error('Ошибка при загрузке данных:', error);
-            }
-        },
-
-
-        filterCards() {
-            if (this.searchQuery.length > 2) {
-                this.filteredCards = this.cards.filter(card => 
-                    card.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-                );
-                this.highlightIndex = -1; // Сброс выделения при новом вводе
-            } else {
-                this.filteredCards = []; // Возврат к исходному массиву, при удалении запроса из строки
-            }
-        },
-        // Выделение перемещения между всплывающими эллементами
-        moveHighlight(direction) {
-            if (this.filteredCards.length > 0) {
-                this.highlightIndex += direction;
-                // Ограничиваем индекс выделения
-                if (this.highlightIndex < 0) {
-                    this.highlightIndex = 0;
-                } else if (this.highlightIndex >= this.filteredCards.length) {
-                    this.highlightIndex = this.filteredCards.length - 1;
-                }
-            }
-        },
-        openCard(cardId) {
-            this.$router.push(`/cards/${cardId}`); // Переход на страницу карточки
-        },
-        // Выделяем выбранный элемент
-        navigateToUser() {
-            if (this.highlightIndex >= 0) {
-                const selectedCard = this.filteredCards[this.highlightIndex];
-                this.openCard(selectedCard.id); // Открываем карточку по ID
-            } else if (this.searchQuery) {
-                const selectedCard = this.cards.find(c => c.name.toLowerCase() === this.searchQuery.toLowerCase());
-                if (selectedCard) {
-                    this.openCard(selectedCard.id); // Открываем карточку по ID
-                }
-            }
+      };
+  
+      // Фильтрация карточек
+      const filterCards = () => {
+        if (searchQuery.value.length > 2) {
+          filteredCards.value = cards.value.filter((card) =>
+            card.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+          );
+          highlightIndex.value = -1;
+        } else {
+          filteredCards.value = [];
         }
-
-       
-    },
-
-    // Хук выполняемый после монтирования компонента
-    mounted(){
-        this.fetchData();  
-    },
-
-    // вычисляемое свойство computed. отрисовывает элемент только при изменении модели
-    computed:{
-
-        // сортировка массива по выбраному селекту
-        sortedPosts(){
-            // сортировка без мутации исходного массива, с помощью сравнения строк
-           return [...this.posts].sort((post1, post2) =>  post1[this.selsectSort]?.localeCompare(post2[this.selsectSort]))
-        },
-
-        // поиск по названию в отсортированном массиве 
-        sortedAndSearch(){
-            return this.sortedPosts.filter(post => post.title.toLowerCase().includes(this.searchQuery.toLowerCase()))
+      };
+  
+      // Навигация по подсказкам
+      const moveHighlight = (direction) => {
+        if (filteredCards.value.length > 0) {
+          highlightIndex.value += direction;
+          if (highlightIndex.value < 0) {
+            highlightIndex.value = 0;
+          } else if (highlightIndex.value >= filteredCards.value.length) {
+            highlightIndex.value = filteredCards.value.length - 1;
+          }
         }
-    },  
-
-    // наблюдаемое свойство
-    watch:{
-        // page(){
-        //     this.fetchPosts()
-        // }
-    }   
-}
-
-</script>
-
-
-
-<style>
-.srch-inputs{
+      };
+  
+      // Открытие карточки
+      const openCard = (cardId) => {
+        router.push(`/cards/${cardId}`);
+      };
+  
+      // Навигация по Enter
+      const navigateToUser = () => {
+        if (highlightIndex.value >= 0) {
+          const selectedCard = filteredCards.value[highlightIndex.value];
+          openCard(selectedCard.id);
+        } else if (searchQuery.value) {
+          const selectedCard = cards.value.find(
+            (c) => c.name.toLowerCase() === searchQuery.value.toLowerCase()
+          );
+          if (selectedCard) {
+            openCard(selectedCard.id);
+          }
+        }
+      };
+  
+      // Загрузка данных при монтировании
+      onMounted(() => {
+        fetchData();
+      });
+  
+      return {
+        searchQuery,
+        cards,
+        filteredCards,
+        highlightIndex,
+        imgSrc,
+        filterCards,
+        moveHighlight,
+        openCard,
+        navigateToUser,
+      };
+    },
+  };
+  </script>
+  
+  <style scoped>
+  .cards-page {
+    padding: 20px;
     display: flex;
     flex-direction: column;
-}
-
-/* TODO дополнить номера страниц, или включить пагинацию  */
-.pages-count{
-    display: flex;
-    min-width: 60%;
-    justify-content: space-between;
-    flex-direction: row;
-    margin: 25px 10px;
-}
-
-.pages-item{
+    align-items: center;
+  }
+  
+  .cards-page__title {
+    margin-bottom: 15px;
     text-align: center;
-    min-height: 40px;
-    min-width: 40px;
-    font-size: 15px;
-    padding: 10px;
-    border-radius: 50%;
-    border: 3px solid rgb(0, 255, 0);
-    color: black;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.pages-item-active{
-    background: linear-gradient(45deg, #42d392, #647eff) border-box;
-    color: var(--main-text-white);
-}
-.suggestions {
-    position: absolute;
-    background-color: white;
-    /* border: 1px solid #ccc; */
-    width: 40%;
-    z-index: 1000;
-}
-
-.suggestions ul {
+    font-size: 24px;
+    color: var(--main-text-green);
+  }
+  
+  .cards-page__search {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
     position: relative;
-    top: 40px;
+  }
+  
+  .cards-page__input {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .cards-page__suggestions {
+    position: absolute;
+    width: 100%;
+    background-color: white;
+    border: 1px solid #ccc;
+    z-index: 1000;
+  }
+  
+  .cards-page__suggestions-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
-}
-
-.suggestions li {
+  }
+  
+  .cards-page__suggestion {
     padding: 10px;
     cursor: pointer;
-}
-
-.suggestions li.highlighted {
+  }
+  
+  .cards-page__suggestion--highlighted {
     background-color: #42d392;
     color: white;
-}
-
-.observer{
+  }
+  
+  .cards-page__cards {
     width: 100%;
-    height: 30px;
-}
-</style>
-
+    max-width: 1200px;
+  }
+  </style>

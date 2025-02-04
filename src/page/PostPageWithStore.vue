@@ -1,155 +1,160 @@
 <template>
-    <div>
-      <h1>Страница с постами</h1>
-      <my-input
-        :model-value="searchQuery"
-        @update:model-value="setSearchQuery"
-        placeholder="Поиск...."
-        v-focus
-        style="margin-bottom: 30px;"
+  <div class="post-page">
+    <h1 class="post-page__title">Страница с постами</h1>
+    <my-input
+      :model-value="searchQuery"
+      @update:model-value="setSearchQuery"
+      placeholder="Поиск...."
+      v-focus
+      class="post-page__search"
+    />
+    <div class="post-page__controls">
+      <my-button @click="showDialog" class="post-page__create-btn">
+        Создать пост
+      </my-button>
+      <my-select
+        :model-value="selectedSort"
+        @update:model-value="setSelectedSort"
+        :options="sortOptions"
+        class="post-page__sort"
       />
-      <div class="app__btns">
-        <my-button
-          @click="showDialog"
-        >
-          Создать пост
-        </my-button>
-        <my-select
-          :model-value="selectedSort"
-          @update:model-value="setSelectedSort"
-          :options="sortOptions"
-        />
-      </div>
-      <my-dialog v-model:show="dialogVisible">
-        <post-form
-          @create="createPost"
-        />
-      </my-dialog>
-      <post-list
-        :posts="sortedAndSearchedPosts"
-        @remove="removePost"
-        v-if="!isPostsLoading"
-      />
-      <div v-else>Идет загрузка...</div>
-      <div v-intersection="loadMorePosts" class="observer"></div>
-      <!-- <div class="page__wrapper">
-        <div
-          v-for="pageNumber in totalPages"
-          :key="pageNumber"
-          class="page"
-          :class="{
-                'current-page': page === pageNumber
-              }"
-          @click="changePage(pageNumber)"
-        >
-          {{ pageNumber }}
-        </div>
-      </div> -->
     </div>
-  </template>
-  
-  <script>
-  import PostForm from "@/components/PostForm";
-  import PostList from "@/components/PostList";
-  import MyButton from "@/components/UI/MyButton";
-  import axios from 'axios';
-  import MySelect from "@/components/UI/MySelect";
-  import MyInput from "@/components/UI/MyInput";
-  import {mapState, mapGetters, mapActions, mapMutations} from 'vuex'
-  
-  export default {
-    components: {
-      MyInput,
-      MySelect,
-      MyButton,
-      PostList, 
-      PostForm
-    },
-    data() {
-      return {
-        dialogVisible: false,
-      }
-    },
-    methods: {
-      ...mapMutations({
-        setPage: 'post/setPage',
-        setSearchQuery: 'post/setSearchQuery',
-        setSelectedSort: 'post/setSelectedSort',
-      }),
-      ...mapActions({
-        loadMorePosts: 'post/loadMorePosts',
-        fetchPosts: 'post/fetchPosts'
-      }),
-      createPost(post) {
-        this.posts.push(post);
-        this.dialogVisible = false;
-      },
-      removePost(post) {
-        this.posts = this.posts.filter(p => p.id !== post.id)
-      },
-      showDialog() {
-        this.dialogVisible = true;
-      },
-    },
-    mounted() {
-      this.fetchPosts();
-    },
-    computed: {
-      ...mapState({
-        posts: state => state.post.posts,
-        isPostsLoading: state => state.post.isPostsLoading,
-        selectedSort: state => state.post.selectedSort,
-        searchQuery: state => state.post.searchQuery,
-        page: state => state.post.page,
-        limit: state => state.post.limit,
-        totalPages: state => state.post.totalPages,
-        sortOptions: state => state.post.sortOptions
-      }),
-      ...mapGetters({
-        sortedPosts: 'post/sortedPosts',
-        sortedAndSearchedPosts: 'post/sortedAndSearchedPosts'
-      })
-    },
-    watch: {
-      // page() {
-      //   this.fetchPosts()
-      // }
-    }
-  }
-  </script>
+    <my-dialog v-model:show="dialogVisible">
+      <post-form @create="createPost" />
+    </my-dialog>
+    <post-list
+      :posts="sortedAndSearchedPosts"
+      @remove="removePost"
+      v-if="!isPostsLoading"
+      class="post-page__list"
+    />
+    <div v-else class="post-page__loading">Идет загрузка...</div>
+    <div v-intersection="loadMorePosts" class="post-page__observer"></div>
+  </div>
+</template>
 
-<style>
+<script>
+import { ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import PostForm from '@/components/PostForm';
+import PostList from '@/components/PostList';
+import MyButton from '@/components/UI/MyButton';
+import MySelect from '@/components/UI/MySelect';
+import MyInput from '@/components/UI/MyInput';
 
+export default {
+  components: {
+    MyInput,
+    MySelect,
+    MyButton,
+    PostList,
+    PostForm,
+  },
+  setup() {
+    const store = useStore();
+    const dialogVisible = ref(false);
 
-.pages-count{
-    display: flex;
-    min-width: 60%;
-    justify-content: space-between;
-    flex-direction: row;
-    margin: 25px 10px;
+    // Состояние и геттеры из Vuex
+    const posts = computed(() => store.state.post.posts);
+    const isPostsLoading = computed(() => store.state.post.isPostsLoading);
+    const selectedSort = computed(() => store.state.post.selectedSort);
+    const searchQuery = computed(() => store.state.post.searchQuery);
+    const sortOptions = computed(() => store.state.post.sortOptions);
+    const sortedPosts = computed(() => store.getters['post/sortedPosts']);
+    const sortedAndSearchedPosts = computed(() => store.getters['post/sortedAndSearchedPosts']);
+
+    // Мутации и действия из Vuex
+    const setSearchQuery = (query) => store.commit('post/setSearchQuery', query);
+    const setSelectedSort = (sort) => store.commit('post/setSelectedSort', sort);
+    const fetchPosts = () => store.dispatch('post/fetchPosts');
+    const loadMorePosts = () => store.dispatch('post/loadMorePosts');
+    const removePost = (post) => store.dispatch('post/removePost', post);
+
+    // Локальные методы
+    const showDialog = () => {
+      dialogVisible.value = true;
+    };
+
+    const createPost = (post) => {
+      posts.value.push(post);
+      dialogVisible.value = false;
+    };
+
+    // Загрузка постов при монтировании компонента
+    onMounted(() => {
+      fetchPosts();
+    });
+
+    return {
+      dialogVisible,
+      posts,
+      isPostsLoading,
+      selectedSort,
+      searchQuery,
+      sortOptions,
+      sortedPosts,
+      sortedAndSearchedPosts,
+      setSearchQuery,
+      setSelectedSort,
+      fetchPosts,
+      loadMorePosts,
+      removePost,
+      showDialog,
+      createPost,
+    };
+  },
+};
+</script>
+
+<style scoped>
+.post-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
-.pages-item{
-    text-align: center;
-    min-height: 40px;
-    min-width: 40px;
-    font-size: 15px;
-    padding: 10px;
-    border-radius: 50%;
-    border: 3px solid rgb(0, 255, 0);
-    color: black;
-    font-weight: 700;
-    cursor: pointer;
+.post-page__title {
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: var(--main-text-green);
 }
 
-.pages-item-active{
-    background: linear-gradient(45deg, #42d392, #647eff) border-box;
-    color: var(--main-text-white);
+.post-page__search {
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 600px;
 }
 
-.observer{
-    width: 100%;
-    height: 30px;
+.post-page__controls {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.post-page__create-btn {
+  background-color: var(--main-green);
+  color: var(--main-text-white);
+}
+
+.post-page__sort {
+  width: 200px;
+}
+
+.post-page__list {
+  width: 100%;
+  max-width: 800px;
+}
+
+.post-page__loading {
+  font-size: 18px;
+  color: var(--main-text-green);
+}
+
+.post-page__observer {
+  width: 100%;
+  height: 30px;
 }
 </style>
-
