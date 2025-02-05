@@ -118,6 +118,9 @@ export default {
     onUnmounted(() => {
       resetBackground();
     });
+    
+    
+    //TO DO ----- не работает смена цвета при переходе. 
 
     // Сброс цвета фона при переходе на другую страницу
     router.beforeEach(() => {
