@@ -1,7 +1,9 @@
 <template >
     <div class="app"><!-- Корневой блок приложения-->
-        <NavBar></NavBar><!--Навбар вынесен за элементы роутера для отображения на всех страницах-->
-        <router-view></router-view> <!--Обязательный компонент для роутера-->
+        <div class="wrapper">
+            <NavBar></NavBar><!--Навбар вынесен за элементы роутера для отображения на всех страницах-->
+            <router-view></router-view> <!--Обязательный компонент для роутера-->
+        </div>
     </div>
 </template>
 <script>
@@ -27,17 +29,21 @@ export default {
     --main-text-green: #213547;
     --border-color-green: #42b883;
 }
-
+.wrapper{
+    max-width: 1024px;
+    min-width: 80%;
+    margin: 0 auto;
+}
 .app{
     min-width: 100%;
     padding: 20px;
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
     align-items: center;
 }
 
 .app__btns{
-    display: flex;
+    /* display: flex; */
     min-width: 30%;
     justify-content: space-between;
     margin-bottom: 15px;

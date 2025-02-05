@@ -5,7 +5,8 @@
   </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router'; // Добавляем импорт useRoute
 import axios from 'axios';
 
 export default {

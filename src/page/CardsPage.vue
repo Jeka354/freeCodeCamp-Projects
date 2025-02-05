@@ -127,58 +127,53 @@
   </script>
   
   <style scoped>
-  .cards-page {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .cards-page__title {
-    margin-bottom: 15px;
-    text-align: center;
-    font-size: 24px;
-    color: var(--main-text-green);
-  }
-  
-  .cards-page__search {
-    width: 100%;
-    max-width: 600px;
-    margin-bottom: 20px;
-    position: relative;
-  }
-  
-  .cards-page__input {
-    width: 100%;
-    margin-bottom: 15px;
-  }
-  
-  .cards-page__suggestions {
-    position: absolute;
-    width: 100%;
-    background-color: white;
-    border: 1px solid #ccc;
-    z-index: 1000;
-  }
-  
-  .cards-page__suggestions-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .cards-page__suggestion {
-    padding: 10px;
-    cursor: pointer;
-  }
-  
-  .cards-page__suggestion--highlighted {
-    background-color: #42d392;
-    color: white;
-  }
-  
-  .cards-page__cards {
-    width: 100%;
-    max-width: 1200px;
-  }
+.cards-page {
+  padding: 20px;
+  text-align: center;
+}
+
+.cards-page__title {
+  font-size: 24px;
+  color: var(--main-text-green);
+  margin-bottom: 20px;
+}
+
+.cards-page__search {
+  width: 100%;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.cards-page__input {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.cards-page__suggestions {
+  position: absolute;
+  width: 100%;
+  background-color: white;
+  border: 1px solid #ccc;
+  z-index: 1000;
+}
+
+.cards-page__suggestions-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cards-page__suggestion {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.cards-page__suggestion--highlighted {
+  background-color: #42d392;
+  color: white;
+}
+
+.cards-page__cards {
+  width: 100%;
+}
   </style>

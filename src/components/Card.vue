@@ -45,13 +45,6 @@ export default defineComponent({
 </script>
 
 <style>
-.cards{
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-evenly;
-    
-}
 
 .card {
     width: 250px; 

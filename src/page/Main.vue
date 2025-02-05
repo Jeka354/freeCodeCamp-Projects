@@ -1,8 +1,6 @@
 <template>
     <div class="main-page">
-      <transition name="fade">
         <h1 class="main-page__title">Добро пожаловать! На курс по VUE JS 3</h1>
-      </transition>
     </div>
   </template>
   
@@ -14,12 +12,11 @@
   
   <style scoped>
   .main-page {
-    display: flex;
+    /* display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh; /* Занимает всю высоту экрана */
-    background-color: var(--main-green);
-    color: var(--main-text-white);
+    align-items: start; */
+    height: 100%; 
+    color: black;
     text-align: center;
   }
   
