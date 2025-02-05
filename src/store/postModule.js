@@ -1,5 +1,5 @@
 import axios from "axios";
-// Модулья для работы с состоянием VUEX
+// Модуль для работы с состоянием VUEX
 export const postModule = {
     state: () => ({
         posts: [],
@@ -46,6 +46,7 @@ export const postModule = {
           }
     },
     actions: {
+        
         async fetchPosts({state, commit}) {
             try {
                 commit('setLoading', true);
@@ -63,6 +64,7 @@ export const postModule = {
                 commit('setLoading', false);
             }
         },
+        // получение новых постов
         async loadMorePosts({state, commit}) {
             try {
                 commit('setPage', state.page + 1)
@@ -78,6 +80,7 @@ export const postModule = {
                 console.log(e)
             }
         },
+        // Удаление поста
         removePost({ commit }, post) {
             commit('removePost', post);
           }
